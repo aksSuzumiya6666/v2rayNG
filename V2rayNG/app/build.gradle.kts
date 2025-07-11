@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.v2ray.ang"
-    compileSdk = canary
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.v2ray.ang"
