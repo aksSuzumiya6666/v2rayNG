@@ -137,6 +137,7 @@
     <!-- Preferences -->
     <string name="title_settings">设置</string>
     <string name="title_advanced">进阶设置</string>
+    <string name="title_core_settings">核心设置</string>
     <string name="title_vpn_settings">VPN 设置</string>
     <string name="title_pref_per_app_proxy">分应用</string>
     <string name="summary_pref_per_app_proxy">常规: 勾选的 App 被代理, 未勾选的直连;\n绕行模式: 勾选的 App 直连, 未勾选的被代理.\n不明白者在菜单中选择自动选中需代理应用</string>
@@ -177,6 +178,8 @@
 
     <string name="title_pref_vpn_dns">VPN DNS (仅支持 IPv4/v6)</string>
     <string name="title_pref_vpn_bypass_lan">VPN 是否绕过局域网</string>
+
+    <string name="title_pref_vpn_interface_address">VPN 接口地址</string>
 
     <string name="title_pref_domestic_dns">境内 DNS (可选)</string>
     <string name="summary_pref_domestic_dns">DNS</string>
@@ -235,6 +238,7 @@
     <string name="title_pref_auto_update_interval">自动更新间隔（分钟，最小值 15）</string>
 
     <string name="title_core_loglevel">日志级别</string>
+    <string name="title_outbound_domain_resolve_method">Outbound 域名预解析方式</string>
     <string name="title_mode">模式</string>
     <string name="title_mode_help">点此查看更多帮助</string>
     <string name="title_language">语言</string>
@@ -262,6 +266,7 @@
     <string name="title_sub_update">更新当前组订阅</string>
     <string name="title_ping_all_server">测试当前组配置 Tcping</string>
     <string name="title_real_ping_all_server">测试当前组配置真连接</string>
+    <string name="title_create_intelligent_selection_all_server">生成当前组智能选择配置</string>
     <string name="title_user_asset_setting">资源文件</string>
     <string name="title_sort_by_test_results">按测试结果排序</string>
     <string name="title_filter_config">过滤配置文件</string>
@@ -358,6 +363,19 @@
         <item>跟随配置文件</item>
         <item>绕过</item>
         <item>不绕过</item>
+    </string-array>
+
+    <string-array name="outbound_domain_resolve_method">
+        <item>不解析</item>
+        <item>解析后添加至 DNS Hosts</item>
+        <item>解析后替换原域名</item>
+    </string-array>
+    <string name="intelligent_selection">智能选择</string>
+    <string name="sub_setting_intelligent_selection_filter">别名智能选择正则过滤</string>
+    <string name="title_intelligent_selection_method">智能选择方式</string>
+    <string-array name="intelligent_selection_method">
+        <item>最低延迟</item>
+        <item>最稳定</item>
     </string-array>
 
 </resources>

@@ -33,12 +33,7 @@ import java.lang.ref.SoftReference
 class V2RayVpnService : VpnService(), ServiceControl {
     companion object {
         private const val VPN_MTU = 1500
-        private const val PRIVATE_VLAN4_CLIENT = "10.10.14.1"
-        private const val PRIVATE_VLAN4_ROUTER = "10.10.14.2"
-        private const val PRIVATE_VLAN6_CLIENT = "fc00::10:10:14:1"
-        private const val PRIVATE_VLAN6_ROUTER = "fc00::10:10:14:2"
         private const val TUN2SOCKS = "libtun2socks.so"
-
     }
 
     private lateinit var mInterface: ParcelFileDescriptor
@@ -160,10 +155,11 @@ class V2RayVpnService : VpnService(), ServiceControl {
         // If the old interface has exactly the same parameters, use it!
         // Configure a builder while parsing the parameters.
         val builder = Builder()
+        val vpnConfig = SettingsManager.getCurrentVpnInterfaceAddressConfig()
         //val enableLocalDns = defaultDPreference.getPrefBoolean(AppConfig.PREF_LOCAL_DNS_ENABLED, false)
 
         builder.setMtu(VPN_MTU)
-        builder.addAddress(PRIVATE_VLAN4_CLIENT, 30)
+        builder.addAddress(vpnConfig.ipv4Client, 30)
         //builder.addDnsServer(PRIVATE_VLAN4_ROUTER)
         val bypassLan = SettingsManager.routingRulesetsBypassLan()
         if (bypassLan) {
@@ -176,7 +172,7 @@ class V2RayVpnService : VpnService(), ServiceControl {
         }
 
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PREFER_IPV6) == true) {
-            builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
+            builder.addAddress(vpnConfig.ipv6Client, 126)
             if (bypassLan) {
                 builder.addRoute("2000::", 3) //currently only 1/8 of total ipV6 is in use
                 builder.addRoute("fc00::", 18) //Xray-core default FakeIPv6 Pool
@@ -198,25 +194,7 @@ class V2RayVpnService : VpnService(), ServiceControl {
 
         builder.setSession(V2RayServiceManager.getRunningServerName())
 
-        val selfPackageName = BuildConfig.APPLICATION_ID
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PER_APP_PROXY)) {
-            val apps = MmkvManager.decodeSettingsStringSet(AppConfig.PREF_PER_APP_PROXY_SET)
-            val bypassApps = MmkvManager.decodeSettingsBool(AppConfig.PREF_BYPASS_APPS)
-            //process self package
-            if (bypassApps) apps?.add(selfPackageName) else apps?.remove(selfPackageName)
-            apps?.forEach {
-                try {
-                    if (bypassApps)
-                        builder.addDisallowedApplication(it)
-                    else
-                        builder.addAllowedApplication(it)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    Log.e(AppConfig.TAG, "Failed to configure app in VPN: ${e.localizedMessage}", e)
-                }
-            }
-        } else {
-            builder.addDisallowedApplication(selfPackageName)
-        }
+        configurePerAppProxy(builder)
 
         // Close the old interface since the parameters have been changed.
         try {
@@ -254,15 +232,61 @@ class V2RayVpnService : VpnService(), ServiceControl {
     }
 
     /**
+     * Configures per-app proxy rules for the VPN builder.
+     *
+     * - If per-app proxy is not enabled, disallow the VPN service's own package.
+     * - If no apps are selected, disallow the VPN service's own package.
+     * - If bypass mode is enabled, disallow all selected apps (including self).
+     * - If proxy mode is enabled, only allow the selected apps (excluding self).
+     *
+     * @param builder The VPN Builder to configure.
+     */
+    private fun configurePerAppProxy(builder: Builder) {
+        val selfPackageName = BuildConfig.APPLICATION_ID
+
+        // If per-app proxy is not enabled, disallow the VPN service's own package and return
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PER_APP_PROXY) == false) {
+            builder.addDisallowedApplication(selfPackageName)
+            return
+        }
+
+        // If no apps are selected, disallow the VPN service's own package and return
+        val apps = MmkvManager.decodeSettingsStringSet(AppConfig.PREF_PER_APP_PROXY_SET)
+        if (apps.isNullOrEmpty()) {
+            builder.addDisallowedApplication(selfPackageName)
+            return
+        }
+
+        val bypassApps = MmkvManager.decodeSettingsBool(AppConfig.PREF_BYPASS_APPS)
+        // Handle the VPN service's own package according to the mode
+        if (bypassApps) apps.add(selfPackageName) else apps.remove(selfPackageName)
+
+        apps.forEach {
+            try {
+                if (bypassApps) {
+                    // In bypass mode, disallow the selected apps
+                    builder.addDisallowedApplication(it)
+                } else {
+                    // In proxy mode, only allow the selected apps
+                    builder.addAllowedApplication(it)
+                }
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(AppConfig.TAG, "Failed to configure app in VPN: ${e.localizedMessage}", e)
+            }
+        }
+    }
+
+    /**
      * Runs the tun2socks process.
      * Starts the tun2socks process with the appropriate parameters.
      */
     private fun runTun2socks() {
         Log.i(AppConfig.TAG, "Start run $TUN2SOCKS")
         val socksPort = SettingsManager.getSocksPort()
+        val vpnConfig = SettingsManager.getCurrentVpnInterfaceAddressConfig()
         val cmd = arrayListOf(
             File(applicationContext.applicationInfo.nativeLibraryDir, TUN2SOCKS).absolutePath,
-            "--netif-ipaddr", PRIVATE_VLAN4_ROUTER,
+            "--netif-ipaddr", vpnConfig.ipv4Router,
             "--netif-netmask", "255.255.255.252",
             "--socks-server-addr", "$LOOPBACK:${socksPort}",
             "--tunmtu", VPN_MTU.toString(),
@@ -273,7 +297,7 @@ class V2RayVpnService : VpnService(), ServiceControl {
 
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PREFER_IPV6)) {
             cmd.add("--netif-ip6addr")
-            cmd.add(PRIVATE_VLAN6_ROUTER)
+            cmd.add(vpnConfig.ipv6Router)
         }
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED)) {
             val localDnsPort = Utils.parseInt(MmkvManager.decodeSettingsString(AppConfig.PREF_LOCAL_DNS_PORT), AppConfig.PORT_LOCAL_DNS.toInt())
