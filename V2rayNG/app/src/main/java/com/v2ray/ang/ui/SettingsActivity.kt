@@ -45,6 +45,7 @@ class SettingsActivity : BaseActivity() {
         private val vpnDns by lazy { findPreference<EditTextPreference>(AppConfig.PREF_VPN_DNS) }
         private val vpnBypassLan by lazy { findPreference<ListPreference>(AppConfig.PREF_VPN_BYPASS_LAN) }
         private val vpnInterfaceAddress by lazy { findPreference<ListPreference>(AppConfig.PREF_VPN_INTERFACE_ADDRESS_CONFIG_INDEX) }
+        private val vpnMtu by lazy { findPreference<EditTextPreference>(AppConfig.PREF_VPN_MTU) }
 
         private val mux by lazy { findPreference<CheckBoxPreference>(AppConfig.PREF_MUX_ENABLED) }
         private val muxConcurrency by lazy { findPreference<EditTextPreference>(AppConfig.PREF_MUX_CONCURRENCY) }
@@ -66,6 +67,10 @@ class SettingsActivity : BaseActivity() {
         private val delayTestUrl by lazy { findPreference<EditTextPreference>(AppConfig.PREF_DELAY_TEST_URL) }
         private val mode by lazy { findPreference<ListPreference>(AppConfig.PREF_MODE) }
 
+        private val hevTunLogLevel by lazy { findPreference<ListPreference>(AppConfig.PREF_HEV_TUNNEL_LOGLEVEL) }
+        private val hevTunRwTimeout by lazy { findPreference<EditTextPreference>(AppConfig.PREF_HEV_TUNNEL_RW_TIMEOUT) }
+        private val useHevTun by lazy { findPreference<CheckBoxPreference>(AppConfig.PREF_USE_HEV_TUNNEL) }
+
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             addPreferencesFromResource(R.xml.pref_settings)
 
@@ -86,6 +91,12 @@ class SettingsActivity : BaseActivity() {
             }
             vpnDns?.setOnPreferenceChangeListener { _, any ->
                 vpnDns?.summary = any as String
+                true
+            }
+
+            vpnMtu?.setOnPreferenceChangeListener { _, any ->
+                val nval = any as String
+                vpnMtu?.summary = if (TextUtils.isEmpty(nval)) AppConfig.VPN_MTU.toString() else nval
                 true
             }
 
@@ -172,6 +183,16 @@ class SettingsActivity : BaseActivity() {
             mode?.dialogLayoutResource = R.layout.preference_with_help_link
             //loglevel.summary = "LogLevel"
 
+            useHevTun?.setOnPreferenceChangeListener { _, newValue ->
+                updateHevTunSettings(newValue as Boolean)
+                true
+            }
+
+            hevTunRwTimeout?.setOnPreferenceChangeListener { _, any ->
+                val nval = any as String
+                hevTunRwTimeout?.summary = if (TextUtils.isEmpty(nval)) AppConfig.HEVTUN_RW_TIMEOUT else nval
+                true
+            }
         }
 
         override fun onStart() {
@@ -182,6 +203,7 @@ class SettingsActivity : BaseActivity() {
             appendHttpProxy?.isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_APPEND_HTTP_PROXY, false)
             localDnsPort?.summary = MmkvManager.decodeSettingsString(AppConfig.PREF_LOCAL_DNS_PORT, AppConfig.PORT_LOCAL_DNS)
             vpnDns?.summary = MmkvManager.decodeSettingsString(AppConfig.PREF_VPN_DNS, AppConfig.DNS_VPN)
+            vpnMtu?.summary = MmkvManager.decodeSettingsString(AppConfig.PREF_VPN_MTU, AppConfig.VPN_MTU.toString())
 
             updateMux(MmkvManager.decodeSettingsBool(AppConfig.PREF_MUX_ENABLED, false))
             mux?.isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_MUX_ENABLED, false)
@@ -205,6 +227,9 @@ class SettingsActivity : BaseActivity() {
             dnsHosts?.summary = MmkvManager.decodeSettingsString(AppConfig.PREF_DNS_HOSTS)
             delayTestUrl?.summary = MmkvManager.decodeSettingsString(AppConfig.PREF_DELAY_TEST_URL, AppConfig.DELAY_TEST_URL)
 
+            updateHevTunSettings(MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_HEV_TUNNEL, false))
+            hevTunRwTimeout?.summary = MmkvManager.decodeSettingsString(AppConfig.PREF_HEV_TUNNEL_RW_TIMEOUT, AppConfig.HEVTUN_RW_TIMEOUT)
+
             initSharedPreference()
         }
 
@@ -212,6 +237,7 @@ class SettingsActivity : BaseActivity() {
             listOf(
                 localDnsPort,
                 vpnDns,
+                vpnMtu,
                 muxConcurrency,
                 muxXudpConcurrency,
                 fragmentLength,
@@ -220,7 +246,8 @@ class SettingsActivity : BaseActivity() {
                 socksPort,
                 remoteDns,
                 domesticDns,
-                delayTestUrl
+                delayTestUrl,
+                hevTunRwTimeout
             ).forEach { key ->
                 key?.text = key?.summary.toString()
             }
@@ -260,7 +287,8 @@ class SettingsActivity : BaseActivity() {
                 AppConfig.PREF_LOGLEVEL,
                 AppConfig.PREF_OUTBOUND_DOMAIN_RESOLVE_METHOD,
                 AppConfig.PREF_INTELLIGENT_SELECTION_METHOD,
-                AppConfig.PREF_MODE
+                AppConfig.PREF_MODE,
+                AppConfig.PREF_HEV_TUNNEL_LOGLEVEL
             ).forEach { key ->
                 if (MmkvManager.decodeSettingsString(key) != null) {
                     findPreference<ListPreference>(key)?.value = MmkvManager.decodeSettingsString(key)
@@ -279,6 +307,7 @@ class SettingsActivity : BaseActivity() {
             vpnDns?.isEnabled = vpn
             vpnBypassLan?.isEnabled = vpn
             vpnInterfaceAddress?.isEnabled = vpn
+            vpnMtu?.isEnabled = vpn
             if (vpn) {
                 updateLocalDns(
                     MmkvManager.decodeSettingsBool(
@@ -365,6 +394,11 @@ class SettingsActivity : BaseActivity() {
 
         private fun updateFragmentInterval(value: String?) {
             fragmentInterval?.summary = value.toString()
+        }
+
+        private fun updateHevTunSettings(enabled: Boolean) {
+            hevTunLogLevel?.isEnabled = enabled
+            hevTunRwTimeout?.isEnabled = enabled
         }
     }
 
