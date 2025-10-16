@@ -32,11 +32,11 @@ jobs:
       run: |
         echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
           --channel=3 \
-          --install "ndk;29.0.14033849"
-        echo "NDK_HOME=$ANDROID_HOME/ndk/29.0.14033849" >> $GITHUB_ENV
+          --install "ndk;29.0.14206865"
+        echo "NDK_HOME=$ANDROID_HOME/ndk/29.0.14206865" >> $GITHUB_ENV
         sed -i '10i\
         \
-            ndkVersion = "29.0.14033849"' ${{ github.workspace }}/V2rayNG/app/build.gradle.kts
+            ndkVersion = "29.0.14206865"' ${{ github.workspace }}/V2rayNG/app/build.gradle.kts
 
     - name: Restore cached libtun2socks
       id: cache-libtun2socks-restore
