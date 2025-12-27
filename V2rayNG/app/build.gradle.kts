@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.jaredsburrows.license")
+    // temporarily disable license plugin to avoid AGP compatibility issues
+    // id("com.jaredsburrows.license")
 }
 
 
@@ -169,8 +170,8 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.work.multiprocess)
 
-    // Multidex Support
-    implementation(libs.multidex)
+    // Multidex Support: not needed for minSdk >= 21
+    // implementation(libs.multidex)
 
     // Testing Libraries
     testImplementation(libs.junit)
