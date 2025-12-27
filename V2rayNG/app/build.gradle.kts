@@ -8,6 +8,10 @@ plugins {
 import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.ApplicationVariant
 
+// read ndk version from a Gradle property `-PndkVersion=...` or from env `NDK_VERSION`
+val ndkVersionFromPropOrEnv: String? = (project.findProperty("ndkVersion") as? String)
+    ?: System.getenv("NDK_VERSION")
+
 android {
     namespace = "com.v2ray.ang"
     compileSdk = 36
@@ -67,7 +71,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            jniLibs.srcDirs("libs")
+            jniLibs.directories.add("libs")
         }
     }
 
@@ -79,6 +83,7 @@ android {
 
     kotlin {
         compilerOptions {
+            languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
         }
     }
@@ -95,23 +100,23 @@ android {
                     it.filterType == FilterConfiguration.FilterType.ABI
                 }?.identifier ?: "universal"
 
-                if (isFdroid) {
-                    val versionCodes = mapOf(
-                        "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
-                    )
-                    output.outputFileName.set("v2rayNG_${versionName}-fdroid_${abi}.apk")
-                    versionCodes[abi]?.let { code ->
-                        output.versionCode.set((100 * versionCode + code) + 5000000)
+                    if (isFdroid) {
+                        val versionCodes = mapOf(
+                            "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
+                        )
+                        // don't set output filename here (AGP public API may differ); only set version code
+                        versionCodes[abi]?.let { code ->
+                            output.versionCode.set((100 * versionCode + code) + 5000000)
+                        }
+                    } else {
+                        val versionCodes = mapOf(
+                            "armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4
+                        )
+                        // don't set output filename here; only set version code
+                        versionCodes[abi]?.let { code ->
+                            output.versionCode.set((1000000 * code) + versionCode)
+                        }
                     }
-                } else {
-                    val versionCodes = mapOf(
-                        "armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4
-                    )
-                    output.outputFileName.set("v2rayNG_${versionName}_${abi}.apk")
-                    versionCodes[abi]?.let { code ->
-                        output.versionCode.set((1000000 * code) + versionCode)
-                    }
-                }
             }
         }
     }
