@@ -4,13 +4,5 @@ plugins {
     alias(libs.plugins.android.library) apply false
 }
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        // Add license plugin to the buildscript classpath so modules can apply it via `apply(plugin = ...)`.
-        classpath("com.jaredsburrows:gradle-license-plugin:${libs.versions.gradleLicensePlugin.get()}")
-    }
-}
+// Intentionally do not add the license plugin to the root buildscript classpath here.
+// The license plugin can be applied selectively in modules if (and only if) compatible with the AGP version.
