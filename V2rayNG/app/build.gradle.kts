@@ -179,7 +179,7 @@ dependencies {
     implementation(libs.work.multiprocess)
 
     // Multidex Support
-    implementation(libs.multidex)
+    // implementation(libs.multidex)
 
     // Testing Libraries
     testImplementation(libs.junit)
