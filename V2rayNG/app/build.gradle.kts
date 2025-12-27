@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    id("com.jaredsburrows.license")
+    // apply Kotlin plugin without specifying version here to avoid "already on the classpath" conflict
+    id("org.jetbrains.kotlin.android")
+    // temporarily disable license plugin to avoid compatibility issues
+    // id("com.jaredsburrows.license")
 }
 
 android {
