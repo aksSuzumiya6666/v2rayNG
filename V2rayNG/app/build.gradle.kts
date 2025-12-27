@@ -1,16 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
-    // temporarily disable license plugin to avoid AGP compatibility issues
-    // id("com.jaredsburrows.license")
+    alias(libs.plugins.kotlin.android)
+    id("com.jaredsburrows.license")
 }
-
-
-import com.android.build.api.variant.FilterConfiguration
-import com.android.build.api.variant.ApplicationVariant
 
 android {
     namespace = "com.v2ray.ang"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.v2ray.ang"
@@ -67,7 +63,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            jniLibs.directories.add("libs")
+            jniLibs.srcDirs("libs")
         }
     }
 
@@ -83,34 +79,47 @@ android {
         }
     }
 
-    androidComponents {
-        onVariants(selector().all()) { variant: ApplicationVariant ->
-            val versionCode = android.defaultConfig.versionCode as Int
-            val versionName = android.defaultConfig.versionName as String
+    applicationVariants.all {
+        val variant = this
+        val isFdroid = variant.productFlavors.any { it.name == "fdroid" }
+        if (isFdroid) {
+            val versionCodes =
+                mapOf(
+                    "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
+                )
 
-            val isFdroid = variant.name.contains("fdroid", ignoreCase = true)
-
-            variant.outputs.forEach { output ->
-                val abi = output.filters.firstOrNull {
-                    it.filterType == FilterConfiguration.FilterType.ABI
-                }?.identifier ?: "universal"
-
-                if (isFdroid) {
-                    val versionCodes = mapOf(
-                        "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
-                    )
-                    versionCodes[abi]?.let { code ->
-                        output.versionCode.set((100 * versionCode + code) + 5000000)
-                    }
-                } else {
-                    val versionCodes = mapOf(
-                        "armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4
-                    )
-                    versionCodes[abi]?.let { code ->
-                        output.versionCode.set((1000000 * code) + versionCode)
+            variant.outputs
+                .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
+                .forEach { output ->
+                    val abi = output.getFilter("ABI") ?: "universal"
+                    output.outputFileName = "v2rayNG_${variant.versionName}-fdroid_${abi}.apk"
+                    if (versionCodes.containsKey(abi)) {
+                        output.versionCodeOverride =
+                            (100 * variant.versionCode + versionCodes[abi]!!).plus(5000000)
+                    } else {
+                        return@forEach
                     }
                 }
-            }
+        } else {
+            val versionCodes =
+                mapOf("armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4)
+
+            variant.outputs
+                .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
+                .forEach { output ->
+                    val abi = if (output.getFilter("ABI") != null)
+                        output.getFilter("ABI")
+                    else
+                        "universal"
+
+                    output.outputFileName = "v2rayNG_${variant.versionName}_${abi}.apk"
+                    if (versionCodes.containsKey(abi)) {
+                        output.versionCodeOverride =
+                            (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
+                    } else {
+                        return@forEach
+                    }
+                }
         }
     }
 
@@ -124,6 +133,7 @@ android {
             useLegacyPackaging = true
         }
     }
+
 }
 
 dependencies {
@@ -170,8 +180,8 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.work.multiprocess)
 
-    // Multidex Support: not needed for minSdk >= 21
-    // implementation(libs.multidex)
+    // Multidex Support
+    implementation(libs.multidex)
 
     // Testing Libraries
     testImplementation(libs.junit)
