@@ -6,19 +6,17 @@ plugins {
 import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.ApplicationVariant
 
-// allow CI to inject `ndkVersion = "..."` at top of this script
-var ndkVersion: String? = null
+// read ndk version from a Gradle property `-PndkVersion=...` or from env `NDK_VERSION`
+val ndkVersionFromPropOrEnv: String? = (project.findProperty("ndkVersion") as? String)
+    ?: System.getenv("NDK_VERSION")
 // removed internal API import (FilterConfigurationImpl) to keep compatibility with newer AGP
 
 android {
     namespace = "com.v2ray.ang"
     compileSdk = 36
 
-    // if CI injected a top-level `ndkVersion` variable, apply it to the Android extension
-    val ndkFromScript = ndkVersion
-    if (ndkFromScript != null) {
-        ndkVersion = ndkFromScript
-    }
+    // apply NDK version if provided by Gradle property or environment
+    ndkVersionFromPropOrEnv?.let { ndkVersion = it }
 
     defaultConfig {
         applicationId = "com.v2ray.ang"
