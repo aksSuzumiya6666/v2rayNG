@@ -111,7 +111,7 @@ jobs:
       uses: actions/setup-java@v5
       with:
         distribution: 'temurin'
-        java-version: '24'
+        java-version: '25'
 
     - name: Decode Keystore
       uses: timheuer/base64-to-file@v1.2.4
