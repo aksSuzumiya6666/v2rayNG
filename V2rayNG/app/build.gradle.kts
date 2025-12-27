@@ -7,11 +7,6 @@ plugins {
 import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.ApplicationVariant
 
-// read ndk version from a Gradle property `-PndkVersion=...` or from env `NDK_VERSION`
-val ndkVersionFromPropOrEnv: String? = (project.findProperty("ndkVersion") as? String)
-    ?: System.getenv("NDK_VERSION")
-// removed internal API import (FilterConfigurationImpl) to keep compatibility with newer AGP
-
 android {
     namespace = "com.v2ray.ang"
     compileSdk = 36
