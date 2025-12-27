@@ -5,7 +5,7 @@ plugins {
 
 import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.ApplicationVariant
-import com.android.build.gradle.internal.api.FilterConfigurationImpl
+// removed internal API import (FilterConfigurationImpl) to keep compatibility with newer AGP
 
 android {
     namespace = "com.v2ray.ang"
@@ -84,21 +84,21 @@ android {
 
     androidComponents {
         onVariants(selector().all()) { variant: ApplicationVariant ->
-            val versionCode = variant.defaultConfig.versionCode.get() as Int
-            val versionName = variant.defaultConfig.versionName.get() as String
+            val versionCode = variant.versionCode.get() as Int
+            val versionName = variant.versionName.get() as String
 
-            val isFdroid = variant.productFlavors["distribution"]?.second == "fdroid"
+            val isFdroid = variant.flavors.firstOrNull { it.first == "distribution" }?.second == "fdroid"
 
             variant.outputs.forEach { output ->
-                val abi = output.filters.firstOrNull { 
-                    it.filterType == FilterConfiguration.FilterType.ABI 
+                val abi = output.filters.firstOrNull {
+                    it.filterType == FilterConfiguration.FilterType.ABI
                 }?.identifier ?: "universal"
 
                 if (isFdroid) {
                     val versionCodes = mapOf(
                         "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
                     )
-                    output.apkOutputFileName.set("v2rayNG_${versionName}-fdroid_${abi}.apk")
+                    output.outputFileName.set("v2rayNG_${versionName}-fdroid_${abi}.apk")
                     versionCodes[abi]?.let { code ->
                         output.versionCode.set((100 * versionCode + code) + 5000000)
                     }
@@ -106,7 +106,7 @@ android {
                     val versionCodes = mapOf(
                         "armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4
                     )
-                    output.apkOutputFileName.set("v2rayNG_${versionName}_${abi}.apk")
+                    output.outputFileName.set("v2rayNG_${versionName}_${abi}.apk")
                     versionCodes[abi]?.let { code ->
                         output.versionCode.set((1000000 * code) + versionCode)
                     }
