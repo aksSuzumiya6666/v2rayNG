@@ -3,8 +3,6 @@ plugins {
     id("com.jaredsburrows.license")
 }
 
-// placeholder so CI can insert `ndkVersion = "..."` at the top of this file
-var ndkVersion: String? = null
 
 import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.ApplicationVariant
