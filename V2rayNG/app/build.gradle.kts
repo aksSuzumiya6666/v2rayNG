@@ -1,14 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
-    // apply Kotlin plugin without specifying version here to avoid "already on the classpath" conflict
     id("org.jetbrains.kotlin.android")
-    // temporarily disable license plugin to avoid compatibility issues
-    // id("com.jaredsburrows.license")
+    id("com.jaredsburrows.license")
 }
 
 android {
     namespace = "com.v2ray.ang"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.v2ray.ang"
