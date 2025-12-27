@@ -78,30 +78,32 @@ android {
         }
     }
 
-    applicationVariants.all { variant ->
-        val versionCode = variant.versionCode as Int
-        val versionName = variant.versionName as String
-        val isFdroid = variant.flavorName == "fdroid"
+    androidComponents {
+        onVariants(selector().all()) { variant ->
+            val versionCode = variant.versionCode.get() as Int
+            val versionName = variant.versionName.get() as String
+            
+            val isFdroid = variant.productFlavors["distribution"] == "fdroid"
+            
+            variant.outputs.forEach { output ->
+                val abi = output.filters.firstOrNull { it.filterType == "ABI" }?.identifier ?: "universal"
 
-        variant.outputs.forEach { output ->
-            val outputImpl = output as com.android.build.gradle.internal.api.ApkVariantOutputImpl
-            val abi = outputImpl.getFilter("ABI") ?: "universal"
-
-            if (isFdroid) {
-                val versionCodes = mapOf(
-                    "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
-                )
-                outputImpl.outputFileName = "v2rayNG_${versionName}-fdroid_${abi}.apk"
-                versionCodes[abi]?.let { code ->
-                    outputImpl.versionCodeOverride = (100 * versionCode + code) + 5000000
-                }
-            } else {
-                val versionCodes = mapOf(
-                    "armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4
-                )
-                outputImpl.outputFileName = "v2rayNG_${versionName}_${abi}.apk"
-                versionCodes[abi]?.let { code ->
-                    outputImpl.versionCodeOverride = (1000000 * code) + versionCode
+                if (isFdroid) {
+                    val versionCodes = mapOf(
+                        "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
+                    )
+                    output.outputFileName.set("v2rayNG_${versionName}-fdroid_${abi}.apk")
+                    versionCodes[abi]?.let { code ->
+                        output.versionCode.set((100 * versionCode + code) + 5000000)
+                    }
+                } else {
+                    val versionCodes = mapOf(
+                        "armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4
+                    )
+                    output.outputFileName.set("v2rayNG_${versionName}_${abi}.apk")
+                    versionCodes[abi]?.let { code ->
+                        output.versionCode.set((1000000 * code) + versionCode)
+                    }
                 }
             }
         }
