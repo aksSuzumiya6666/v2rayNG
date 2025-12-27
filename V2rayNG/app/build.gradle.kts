@@ -11,9 +11,6 @@ android {
     namespace = "com.v2ray.ang"
     compileSdk = 36
 
-    // apply NDK version if provided by Gradle property or environment
-    ndkVersionFromPropOrEnv?.let { ndkVersion = it }
-
     defaultConfig {
         applicationId = "com.v2ray.ang"
         minSdk = 21
