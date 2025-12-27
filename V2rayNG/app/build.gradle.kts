@@ -3,11 +3,11 @@ plugins {
     id("com.jaredsburrows.license")
 }
 
-// allow CI to inject `ndkVersion = "..."` at top of this script
-var ndkVersion: String? = null
-
 import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.ApplicationVariant
+
+// allow CI to inject `ndkVersion = "..."` at top of this script
+var ndkVersion: String? = null
 // removed internal API import (FilterConfigurationImpl) to keep compatibility with newer AGP
 
 android {
