@@ -193,9 +193,18 @@ dependencies {
 }
 
 // Apply license plugin from root buildscript classpath (added in root build.gradle.kts)
+// Only apply if legacy AppExtension class is present; the plugin expects the older AGP extension.
 try {
-    apply(plugin = "com.jaredsburrows.license")
+    val hasLegacyAppExtension = runCatching {
+        Class.forName("com.android.build.gradle.AppExtension")
+        true
+    }.getOrDefault(false)
+
+    if (hasLegacyAppExtension) {
+        apply(plugin = "com.jaredsburrows.license")
+    } else {
+        logger.warn("Skipping license plugin: legacy AppExtension class not found; plugin may be incompatible with current AGP.")
+    }
 } catch (e: Exception) {
-    // If the plugin is incompatible with this AGP version, log a warning and continue.
-    logger.warn("License plugin failed to apply: ${'$'}{e.message}")
+    logger.warn("License plugin check failed: ${'$'}{e.message}")
 }
