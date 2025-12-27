@@ -5,7 +5,12 @@ plugins {
 }
 
 buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
     dependencies {
-        classpath(libs.gradle.license.plugin)
+        // Add license plugin to the buildscript classpath so modules can apply it via `apply(plugin = ...)`.
+        classpath("com.jaredsburrows:gradle-license-plugin:${libs.versions.gradleLicensePlugin.get()}")
     }
 }

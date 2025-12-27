@@ -2,7 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     // Kotlin is provided by AGP built-in Kotlin (AGP 9+); do not apply kotlin-android plugin here.
     // id("org.jetbrains.kotlin.android")
-    id("com.jaredsburrows.license")
+    // Temporarily disabled: license plugin triggers "Extension of type 'AppExtension' does not exist" with current AGP.
+    // If you need license reports, re-enable via a compatible root buildscript classpath or use a compatible plugin version.
+    // id("com.jaredsburrows.license")
 }
 
 import com.android.build.api.variant.FilterConfiguration
@@ -188,4 +190,12 @@ dependencies {
     testImplementation(libs.org.mockito.mockito.inline)
     testImplementation(libs.mockito.kotlin)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+}
+
+// Apply license plugin from root buildscript classpath (added in root build.gradle.kts)
+try {
+    apply(plugin = "com.jaredsburrows.license")
+} catch (e: Exception) {
+    // If the plugin is incompatible with this AGP version, log a warning and continue.
+    logger.warn("License plugin failed to apply: ${'$'}{e.message}")
 }
