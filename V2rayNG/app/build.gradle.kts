@@ -3,6 +3,9 @@ plugins {
     id("com.jaredsburrows.license")
 }
 
+// allow CI to inject `ndkVersion = "..."` at top of this script
+var ndkVersion: String? = null
+
 import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.ApplicationVariant
 // removed internal API import (FilterConfigurationImpl) to keep compatibility with newer AGP
@@ -10,6 +13,12 @@ import com.android.build.api.variant.ApplicationVariant
 android {
     namespace = "com.v2ray.ang"
     compileSdk = 36
+
+    // if CI injected a top-level `ndkVersion` variable, apply it to the Android extension
+    val ndkFromScript = ndkVersion
+    if (ndkFromScript != null) {
+        ndkVersion = ndkFromScript
+    }
 
     defaultConfig {
         applicationId = "com.v2ray.ang"
