@@ -62,7 +62,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            jniLibs.directories.add(file("libs"))
+            jniLibs.directories.add("libs")
         }
     }
 
@@ -78,34 +78,34 @@ android {
         }
     }
 
-    onVariants(selector().all(), { variant ->
-        val variantName = variant.name
-        val versionName = variant.versionName.get()
-        val versionCode = variant.versionCode.get()
-        val isFdroid = variant.productFlavors.any { it.second == "fdroid" }
+    applicationVariants.all { variant ->
+        val versionCode = variant.versionCode as Int
+        val versionName = variant.versionName as String
+        val isFdroid = variant.flavorName == "fdroid"
 
         variant.outputs.forEach { output ->
-            val abi = output.filters.find { it.filterType == "ABI" }?.identifier ?: "universal"
-            
+            val outputImpl = output as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+            val abi = outputImpl.getFilter("ABI") ?: "universal"
+
             if (isFdroid) {
                 val versionCodes = mapOf(
                     "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
                 )
-                output.outputFileName.set("v2rayNG_${versionName}-fdroid_${abi}.apk")
+                outputImpl.outputFileName = "v2rayNG_${versionName}-fdroid_${abi}.apk"
                 versionCodes[abi]?.let { code ->
-                    output.versionCode.set((100 * versionCode + code) + 5000000)
+                    outputImpl.versionCodeOverride = (100 * versionCode + code) + 5000000
                 }
             } else {
                 val versionCodes = mapOf(
                     "armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4
                 )
-                output.outputFileName.set("v2rayNG_${versionName}_${abi}.apk")
+                outputImpl.outputFileName = "v2rayNG_${versionName}_${abi}.apk"
                 versionCodes[abi]?.let { code ->
-                    output.versionCode.set((1000000 * code) + versionCode)
+                    outputImpl.versionCodeOverride = (1000000 * code) + versionCode
                 }
             }
         }
-    })
+    }
 
     buildFeatures {
         viewBinding = true
