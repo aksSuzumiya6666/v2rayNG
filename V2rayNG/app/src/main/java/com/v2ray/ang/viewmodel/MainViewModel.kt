@@ -380,9 +380,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun sortByTestResults() {
         if (subscriptionId.isEmpty()) {
-            val subscriptions = MmkvManager.decodeSubscriptions()
-            subscriptions.forEach { sub ->
-                sortByTestResultsForSub(sub.guid)
+            MmkvManager.decodeSubsList().forEach { guid ->
+                sortByTestResultsForSub(guid)
             }
         } else {
             sortByTestResultsForSub(subscriptionId)
@@ -410,6 +409,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // Save the sorted list for this subscription
         MmkvManager.encodeServerList(sortedServerList, subId)
     }
+
 
     /**
      * Initializes assets.

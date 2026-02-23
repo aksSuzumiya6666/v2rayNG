@@ -29,6 +29,7 @@ object MmkvManager {
     private const val ID_SETTING = "SETTING"
     private const val KEY_SELECTED_SERVER = "SELECTED_SERVER"
     private const val KEY_ANG_CONFIGS = "ANG_CONFIGS"
+    private const val KEY_SUB_SERVER_PREFIX = "SUB_SERVERS_"
     private const val KEY_SUB_IDS = "SUB_IDS"
     private const val KEY_WEBDAV_CONFIG = "WEBDAV_CONFIG"
 
@@ -90,10 +91,8 @@ object MmkvManager {
      */
     fun encodeServerList(serverList: MutableList<String>, subscriptionId: String) {
         val subId = getSubscriptionId(subscriptionId)
-        val subItem = decodeSubscription(subId) ?: return
-
-        subItem.serverList = serverList
-        encodeSubscription(subId, subItem)
+        val key = "$KEY_SUB_SERVER_PREFIX$subId"
+        mainStorage.encode(key, JsonUtil.toJson(serverList))
     }
 
     // Legacy method for compatibility
@@ -114,8 +113,13 @@ object MmkvManager {
      */
     fun decodeServerList(subscriptionId: String): MutableList<String> {
         val subId = getSubscriptionId(subscriptionId)
-
-        return decodeSubscription(subId)?.serverList ?: mutableListOf()
+        val key = "$KEY_SUB_SERVER_PREFIX$subId"
+        val json = mainStorage.decodeString(key)
+        return if (json.isNullOrBlank()) {
+            mutableListOf()
+        } else {
+            JsonUtil.fromJson(json, Array<String>::class.java)?.toMutableList() ?: mutableListOf()
+        }
     }
 
     /**
@@ -128,8 +132,8 @@ object MmkvManager {
         val allServers = mutableListOf<String>()
 
         // Add servers from all subscriptions (including default subscription)
-        decodeSubscriptions().forEach { sub ->
-            allServers.addAll(sub.subscription.serverList)
+        decodeSubsList().forEach { guid ->
+            allServers.addAll(decodeServerList(guid))
         }
 
         return allServers
@@ -262,14 +266,11 @@ object MmkvManager {
     /**
      * Removes the server configurations via subscription ID.
      *
-     * @param subid The subscription ID.
+     * @param subscriptionId The subscription ID.
      */
-    fun removeServerViaSubid(subid: String?) {
-        val subId2 = getSubscriptionId(subid)
-
-        // Get server list from subscription
-        val subItem = decodeSubscription(subId2) ?: return
-        val serverList = subItem.serverList
+    fun removeServerViaSubid(subscriptionId: String?) {
+        val subId = getSubscriptionId(subscriptionId)
+        val serverList = decodeServerList(subId)
 
         // Remove all servers in the list
         serverList.forEach { guid ->
@@ -280,9 +281,8 @@ object MmkvManager {
             serverAffStorage.remove(guid)
         }
 
-        // Clear subscription's serverList
-        subItem.serverList.clear()
-        encodeSubscription(subId2, subItem)
+        serverList.clear()
+        encodeServerList(serverList, subId)
 
         // Legacy code - keep for reference during migration
         /*
@@ -349,21 +349,12 @@ object MmkvManager {
      */
     fun removeAllServer(): Int {
         val count = profileFullStorage.allKeys()?.count() ?: 0
-
-        decodeSubscriptions().forEach { sub ->
-            sub.subscription.serverList.clear()
-            encodeSubscription(sub.guid, sub.subscription)
-        }
-
-        // Clear all storage
         mainStorage.clearAll()
         profileFullStorage.clearAll()
         //profileStorage.clearAll()
         serverAffStorage.clearAll()
-
         return count
     }
-
 
     /**
      * Removes invalid server configurations.

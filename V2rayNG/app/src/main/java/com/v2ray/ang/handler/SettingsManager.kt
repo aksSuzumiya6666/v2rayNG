@@ -499,11 +499,7 @@ object SettingsManager {
 
         // Update each subscription's serverList (including default subscription)
         subscriptionServerMap.forEach { (subId, serverGuids) ->
-            val subItem = decodeSubscription(subId)
-            if (subItem != null) {
-                subItem.serverList = serverGuids
-                encodeSubscription(subId, subItem)
-            }
+            MmkvManager.encodeServerList(serverGuids, subId)
         }
 
         // Remove legacy KEY_ANG_CONFIGS data
@@ -522,7 +518,6 @@ object SettingsManager {
         if (decodeSubscription(DEFAULT_SUBSCRIPTION_ID) == null) {
             val defaultSub = SubscriptionItem(
                 remarks = "Default",
-                serverList = mutableListOf()
             )
             encodeSubscription(DEFAULT_SUBSCRIPTION_ID, defaultSub)
 
