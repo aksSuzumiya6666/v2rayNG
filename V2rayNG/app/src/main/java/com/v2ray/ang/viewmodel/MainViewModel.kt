@@ -240,13 +240,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         updateListAction.value = -1
 
-        val serversCopy = serversCache.toList()
         viewModelScope.launch(Dispatchers.Default) {
-            val guids = ArrayList<String>(serversCopy.map { it.guid })
-            if (guids.isEmpty()) {
+            if (serversCache.isEmpty()) {
                 return@launch
             }
-            MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG, guids)
+            MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG, subscriptionId)
         }
     }
 
@@ -283,7 +281,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         val groups = mutableListOf<GroupMapItem>()
-        if (subscriptions.count() > 1) {
+        if (subscriptions.size > 1
+            && MmkvManager.decodeSettingsBool(AppConfig.PREF_GROUP_ALL_DISPLAY)
+        ) {
             groups.add(
                 GroupMapItem(
                     id = "",
