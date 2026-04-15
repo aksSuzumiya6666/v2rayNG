@@ -116,7 +116,7 @@ object V2rayConfigManager {
         // add tun inbound from template
         val templateConfig = initV2rayConfig(context) ?: return result
         val inboundTun = templateConfig.inbounds.firstOrNull { it.tag == "tun" } ?: return result
-        inboundTun.settings?.mtu = SettingsManager.getVpnMtu()
+        inboundTun.settings?.mtu = arrayListOf(SettingsManager.getVpnMtu())
 
         // add to json
         inboundsJson.add(JsonUtil.parseString(JsonUtil.toJson(inboundTun)))
@@ -373,12 +373,29 @@ object V2rayConfigManager {
     private fun getInbounds(v2rayConfig: V2rayConfig): Boolean {
         try {
             val socksPort = SettingsManager.getSocksPort()
+            val socksUsername = SettingsManager.getSocksUsername()
+            val socksPassword = SettingsManager.getSocksPassword()
             val inbound1 = v2rayConfig.inbounds[0]
+            if (inbound1.settings == null) {
+                inbound1.settings = V2rayConfig.InboundBean.InSettingsBean()
+            }
 
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PROXY_SHARING) != true) {
                 inbound1.listen = AppConfig.LOOPBACK
             }
             inbound1.port = socksPort
+            if (socksUsername != null && socksPassword != null) {
+                inbound1.settings?.auth = "password"
+                inbound1.settings?.accounts = listOf(
+                    V2rayConfig.InboundBean.InSettingsBean.SocksAccountBean(
+                        user = socksUsername,
+                        pass = socksPassword
+                    )
+                )
+            } else {
+                inbound1.settings?.auth = "noauth"
+                inbound1.settings?.accounts = null
+            }
             val fakedns = MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED) == true
             val sniffAllTlsAndHttp =
                 MmkvManager.decodeSettingsBool(AppConfig.PREF_SNIFFING_ENABLED, true) != false
@@ -402,7 +419,7 @@ object V2rayConfigManager {
 
             if (needTun()) {
                 val inboundTun = v2rayConfig.inbounds.firstOrNull { e -> e.tag == "tun" }
-                inboundTun?.settings?.mtu = SettingsManager.getVpnMtu()
+                inboundTun?.settings?.mtu = arrayListOf(SettingsManager.getVpnMtu())
                 inboundTun?.sniffing = inbound1.sniffing
             }
         } catch (e: Exception) {
