@@ -30,6 +30,7 @@
     <string name="menu_item_import_config_clipboard">Импорт из буфера обмена</string>
     <string name="menu_item_import_config_local">Импорт из файла</string>
     <string name="menu_item_import_config_policy_group">Добавить группу политик</string>
+    <string name="menu_item_import_config_proxy_chain">Add [Proxy chain]</string>
     <string name="menu_item_import_config_manually_vmess">Ручной ввод VMess</string>
     <string name="menu_item_import_config_manually_vless">Ручной ввод VLESS</string>
     <string name="menu_item_import_config_manually_ss">Ручной ввод Shadowsocks</string>
@@ -116,7 +117,6 @@
     <string name="server_lab_xhttp_extra">Необработанный JSON XHTTP Extra, формат: { XHTTPObject }</string>
     <string name="server_lab_final_mask">Необработанный JSON FinalMask, формат: { FinalMaskObject }</string>
     <string name="server_lab_ech_config_list">EchConfigList</string>
-    <string name="server_lab_ech_force_query">EchForceQuery</string>
     <string name="server_lab_pinned_ca256">Отпечаток сертификата (SHA-256)</string>
 
     <!-- UserAssetActivity -->
@@ -225,10 +225,10 @@
     <string name="summary_pref_allow_insecure">Для TLS по умолчанию разрешены небезопасные соединения</string>
 
     <string name="title_pref_socks_port">Порт локального прокси</string>
-    <string name="title_pref_enable_local_proxy">Включить локальный прокси</string>
-    <string name="summary_pref_enable_local_proxy">When disabled, no SOCKS proxy is available, so subscription updates and similar actions cannot use the proxy</string>
+    <string name="title_pref_enable_local_proxy">Использовать локальный прокси</string>
+    <string name="summary_pref_enable_local_proxy">Если отключено, SOCKS-прокси недоступен, поэтому обновления подписки и подобные действия не смогут использовать прокси</string>
     <string name="title_pref_socks_enable_udp">SOCKS5 UDP</string>
-    <string name="summary_pref_socks_enable_udp">Аутентификация socks5 не полностью безопасна при использовании UDP</string>
+    <string name="summary_pref_socks_enable_udp">Аутентификация SOCKS5 не полностью безопасна при использовании UDP</string>
     <string name="summary_pref_socks_port">Порт локального прокси</string>
     <string name="title_pref_dynamic_socks_port">Динамически менять порт локального прокси</string>
     <string name="summary_pref_dynamic_socks_port">Использовать случайный порт локального прокси при каждом создании соединения</string>
@@ -304,6 +304,7 @@
     <string name="sub_setting_pre_profile">Предыдущий профиль прокси</string>
     <string name="sub_setting_next_profile">Следующий профиль прокси</string>
     <string name="sub_setting_pre_profile_tip">Профиль должен быть уникальным</string>
+    <string name="toast_invalid_update_interval">Неверный интервал обновления. Минимум 15 минут.</string>
     <string name="title_sub_update">Обновить подписку</string>
     <string name="title_ping_all_server">Проверить профили</string>
     <string name="title_real_ping_all_server">Проверить задержку профилей</string>
@@ -378,6 +379,12 @@
     <string name="title_policy_group_type">Тип группы политик</string>
     <string name="title_policy_group_subscription_id">Из группы подписки</string>
     <string name="title_policy_group_subscription_filter">Название фильтра</string>
+    <string name="server_proxy_chain_members">Участники цепочки прокси</string>
+    <string name="server_proxy_chain_pick_members">Нажмите здесь, чтобы выбрать участника</string>
+    <string name="server_proxy_chain_member_unselected">Выберите участника</string>
+    <string name="server_proxy_chain_members_unselected">Пожалуйста, выберите участника для каждой строки цепочки</string>
+    <string name="server_proxy_chain_members_insufficient">Недостаточно участников</string>
+    <string name="server_proxy_chain_members_invalid">Недопустимые участники цепочки: %1$s</string>
 
     <!-- BackupActivity -->
     <string name="title_configuration_backup_restore">Резервное копирование</string>

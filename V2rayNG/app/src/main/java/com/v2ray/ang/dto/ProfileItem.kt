@@ -46,7 +46,6 @@ data class ProfileItem(
     var fingerPrint: String? = null,
     var insecure: Boolean? = null,
     var echConfigList: String? = null,
-    var echForceQuery: String? = null,
     var pinnedCA256: String? = null,
 
     var publicKey: String? = null,
@@ -70,6 +69,7 @@ data class ProfileItem(
     var policyGroupType: String? = null,
     var policyGroupSubscriptionId: String? = null,
     var policyGroupFilter: String? = null,
+    var proxyChainProfiles: String? = null,
 
     ) {
     companion object {
@@ -130,6 +130,7 @@ data class ProfileItem(
                 && this.portHopping == obj.portHopping
                 && this.portHoppingInterval == obj.portHoppingInterval
                 && this.pinnedCA256 == obj.pinnedCA256
+                && this.proxyChainProfiles == obj.proxyChainProfiles
                 )
     }
 }

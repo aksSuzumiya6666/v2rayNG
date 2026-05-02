@@ -30,6 +30,7 @@
     <string name="menu_item_import_config_clipboard">کانفیگ را از کلیپ ‌بورد وارد کنید</string>
     <string name="menu_item_import_config_local">کانفیگ را از محلی وارد کنید</string>
     <string name="menu_item_import_config_policy_group">اضافه کردن [گروه خط مشی]</string>
+    <string name="menu_item_import_config_proxy_chain">Add [Proxy chain]</string>
     <string name="menu_item_import_config_manually_vmess">تایپ دستی[VMESS]</string>
     <string name="menu_item_import_config_manually_vless">تایپ دستی[VLESS]</string>
     <string name="menu_item_import_config_manually_ss">تایپ دستی[SHADOWSOCKS]</string>
@@ -116,7 +117,6 @@
     <string name="server_lab_xhttp_extra">خام JSON XHTTP Extra، قالب: { XHTTPObject }</string>
     <string name="server_lab_final_mask">finalMask raw JSON, format: { FinalMaskObject }</string>
     <string name="server_lab_ech_config_list">لیست کانفیگ Ech</string>
-    <string name="server_lab_ech_force_query">EchForceQuery</string>
     <string name="server_lab_pinned_ca256">Certificate fingerprint (SHA-256)</string>
 
     <!-- UserAssetActivity -->
@@ -298,6 +298,7 @@
     <string name="sub_setting_pre_profile">نام مستعار پروکسی قبلی</string>
     <string name="sub_setting_next_profile">نام مستعار پروکسی بعدی</string>
     <string name="sub_setting_pre_profile_tip">لطفاً مطمئن شوید که نام مستعار وجود دارد و منحصر به فرد است</string>
+    <string name="toast_invalid_update_interval">بازه بروزرسانی نامعتبر است. حداقل مقدار 15 دقیقه است.</string>
     <string name="title_sub_update">به‌روزرسانی گروه فعلی اشتراک</string>
     <string name="title_ping_all_server">TCPING کانفیگ های گروه فعلی</string>
     <string name="title_real_ping_all_server">تاخیر واقعی کانفیگ های گروه فعلی</string>
@@ -372,6 +373,12 @@
     <string name="title_policy_group_type">نوع گروه خط مشی</string>
     <string name="title_policy_group_subscription_id">از گروه اشتراک</string>
     <string name="title_policy_group_subscription_filter">توضیحات فیلتر معمولی</string>
+    <string name="server_proxy_chain_members">اعضای زنجیره پروکسی</string>
+    <string name="server_proxy_chain_pick_members">برای انتخاب عضو اینجا بزنید</string>
+    <string name="server_proxy_chain_member_unselected">یک عضو را انتخاب کنید</string>
+    <string name="server_proxy_chain_members_unselected">لطفا برای هر ردیف زنجیره remark انتخاب کنید</string>
+    <string name="server_proxy_chain_members_insufficient">تعداد اعضا کافی نیست</string>
+    <string name="server_proxy_chain_members_invalid">اعضای نامعتبر زنجیره: %1$s</string>
 
     <!-- BackupActivity -->
     <string name="title_configuration_backup_restore">پشتیبان‌گیری و بازیابی</string>
