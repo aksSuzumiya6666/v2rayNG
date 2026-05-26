@@ -16,6 +16,7 @@ import com.v2ray.ang.contracts.ServiceControl
 import com.v2ray.ang.dto.OutboundTrafficStat
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.enums.EConfigType
+import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.NotificationManager
@@ -145,9 +146,7 @@ object CoreServiceManager {
                 error(context.getString(R.string.toast_config_file_invalid))
             }
 
-        if (config.configType != EConfigType.CUSTOM
-            && config.configType != EConfigType.POLICYGROUP
-            && config.configType != EConfigType.PROXYCHAIN
+        if (!config.configType.isComplexType()
             && !Utils.isValidUrl(config.server)
             && !Utils.isPureIpAddress(config.server.orEmpty())
         ) {
@@ -176,7 +175,20 @@ object CoreServiceManager {
             Intent(context.applicationContext, CoreProxyOnlyService::class.java)
         }
 
-        ContextCompat.startForegroundService(context, intent)
+        try {
+            ContextCompat.startForegroundService(context, intent)
+        } catch (e: SecurityException) {
+            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Missing permission to start foreground service", e)
+            throw IllegalStateException(e.message ?: e.javaClass.simpleName, e)
+        } catch (e: RuntimeException) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                e.javaClass.name == "android.app.ForegroundServiceStartNotAllowedException"
+            ) {
+                LogUtil.e(AppConfig.TAG, "StartCore-Manager: Foreground service start not allowed", e)
+                throw IllegalStateException(e.message ?: e.javaClass.simpleName, e)
+            }
+            throw e
+        }
     }
 
     /**
