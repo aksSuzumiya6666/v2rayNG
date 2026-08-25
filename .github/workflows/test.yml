@@ -25,18 +25,18 @@ jobs:
       uses: android-actions/setup-android@v4
       with:
         log-accepted-android-sdk-licenses: false
-        cmdline-tools-version: '14742923'
+        cmdline-tools-version: '15859902'
         packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
 
     - name: Install NDK
       run: |
         echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
           --channel=0 \
-          --install "ndk;30.0.15729638"
-        echo "NDK_HOME=$ANDROID_HOME/ndk/30.0.15729638" >> $GITHUB_ENV
+          --install "ndk;30.0.16138531"
+        echo "NDK_HOME=$ANDROID_HOME/ndk/30.0.16138531" >> $GITHUB_ENV
         sed -i '10i\
         \
-            ndkVersion = "30.0.15729638"' ${{ github.workspace }}/V2rayNG/app/build.gradle.kts
+            ndkVersion = "30.0.16138531"' ${{ github.workspace }}/V2rayNG/app/build.gradle.kts
 
     - name: Restore cached libhevtun
       id: cache-libhevtun-restore
